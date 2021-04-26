@@ -1,0 +1,136 @@
+/*
+ * @NOTE: Prepend a `~` to css file paths that are in your node_modules
+ *        See https://github.com/webpack-contrib/sass-loader#imports
+ */
+
+body {
+  background: linear-gradient(45deg, #fe6b8b 30%, #ff8e53 90%);
+  min-height: 100vh;
+}
+
+.radiusPulse {
+  padding: 10px;
+  position: relative;
+}
+
+.radiusPulse::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  right: -1px;
+  left: -1px;
+  background-color: #f50057;
+  border-radius: 50%;
+  transform: scale(0);
+  transition: transform 0.3s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+.radiusPulse::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  right: -1px;
+  left: -1px;
+  border: 2px solid #f50057;
+  border-radius: 50%;
+  transform: scale(1);
+  opacity: 1;
+  transition: opacity 0.3s cubic-bezier(0.215, 0.61, 0.355, 1),
+    transform 0.3s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+.radiusPulse.active::before {
+  transform: scale(1);
+}
+
+.radiusPulse.active::after {
+  transform: scale(1.2);
+  opacity: 0;
+}
+
+.radiusPulse.active {
+  display: block;
+  padding: 10px;
+  border-radius: 50%;
+  background: #f50057;
+  cursor: pointer;
+  box-shadow: 0 0 0 #f5005652;
+  animation: pulseAnim 2s infinite;
+}
+
+@keyframes pulseAnim {
+  0% {
+    box-shadow: 0 0 0 0 #f50057(88, 120, 243, 0.4);
+  }
+  90% {
+    box-shadow: 0 0 0 10px rgba(88, 120, 243, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(88, 120, 243, 0);
+  }
+}
+
+.slideUpBtn {
+  cursor: pointer;
+  padding: 7px 10px 7px 10px;
+  min-width: 30px;
+  display: inline-block;
+  background-color: transparent;
+  box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2),
+    0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(1, 0.15, 0.34, 0.92);
+}
+
+.slideUpBtn span {
+  display: flex;
+  justify-content: center;
+  transition: inherit;
+}
+
+.slideUpBtn:hover span {
+  opacity: 0;
+  transform: translateY(-100%);
+}
+
+.slideUpBtn::before {
+  content: '';
+  background-color: hsl(0, 80%, 62%);
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  transform: translateY(100%);
+  transition: inherit;
+  width: 100%;
+  transition: transform 0.5s cubic-bezier(1, 0.15, 0.34, 0.92);
+}
+
+.slideUpBtn::after {
+  content: '🗑️';
+  align-items: center;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  left: 0;
+  position: absolute;
+  top: 0;
+  transition: inherit;
+  transform: translateY(100%);
+  width: 100%;
+}
+
+.slideUpBtn:hover::before {
+  transform: translateY(0) scale(3);
+  transition-delay: 0.025s;
+}
+
+.slideUpBtn:hover::after {
+  opacity: 1;
+  color: hsl(222, 100%, 95%);
+  transform: translateY(0);
+}
