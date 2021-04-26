@@ -7,11 +7,13 @@ import {
   makeStyles,
   Snackbar,
 } from '@material-ui/core';
+import TextField from '@material-ui/core/TextField';
 import SaveIcon from '@material-ui/icons/Save';
 import Alert, { Color } from '@material-ui/lab/Alert';
 import { ipcRenderer } from 'electron';
 import React, { useState } from 'react';
 import Info from './Info';
+import Name from './Name';
 import Recorder from './Recorder';
 import Trigger from './Trigger';
 
@@ -33,10 +35,15 @@ type Message = {
 
 const FormContainer = () => {
   const classes = useStyles();
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<Message | null>(null);
+  const [formReady, setFormReady] = useState<FormReady>({
+    trigger: false,
+    recorder: false,
+    name: false,
+  });
   const [macroKeys, setMacroKeys] = useState<Key[]>([]);
   const [triggerKeys, setKeys] = useState<Key[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<Message | null>(null);
 
   const submit = () => {
     setLoading(true);
@@ -81,10 +88,23 @@ const FormContainer = () => {
       <Grid item xs={12}>
         <Info />
       </Grid>
-      <Grid item xs={6}>
-        <Trigger keysDown={triggerKeys} setKeysDown={setKeys} />
+      <Grid item xs={4}>
+        <Trigger
+          setReady={(isReady: boolean) =>
+            setFormReady((c) => ({ ...c, trigger: isReady }))
+          }
+          setKeys={setKeys}
+        />
       </Grid>
-      <Recorder keys={macroKeys} setKeys={setMacroKeys} />
+      <Grid item xs={4}>
+        <Name />
+      </Grid>
+      <Recorder
+        setReady={(isReady: boolean) =>
+          setFormReady((c) => ({ ...c, recorder: isReady }))
+        }
+        setKeys={setMacroKeys}
+      />
       {macroKeys.length !== 0 && triggerKeys.length !== 0 && (
         <Grid item xs={12}>
           <Box className={classes.btnBox}>

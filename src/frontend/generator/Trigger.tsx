@@ -4,34 +4,37 @@ import { TextField } from '@material-ui/core';
 import { displayKeys } from '../helpers';
 
 type TriggerProps = {
-  keysDown: Key[];
-  setKeysDown: React.Dispatch<React.SetStateAction<Key[]>>;
+  setReady: (isReady: boolean) => void;
+  setKeys: React.Dispatch<React.SetStateAction<Key[]>>;
 };
 
-const Trigger = ({ keysDown, setKeysDown }: TriggerProps) => {
+const Trigger = ({ setKeys: setParentKeys, setReady }: TriggerProps) => {
+  const [keys, setKeys] = useState<Key[]>([]);
   const [inputFlowActive, setInputFlowActive] = useState(false);
 
-  const addKey = (key: Key, keys: Key[] = keysDown) => {
-    if (!keys.find(({ code }) => code === key.code)) {
-      setKeysDown([...keys, key]);
+  const addKey = (key: Key, keysArg: Key[] = keys) => {
+    if (!keysArg.find(({ code }) => code === key.code)) {
+      setKeys([...keysArg, key]);
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     e.preventDefault();
-    let tempKeysDown = keysDown;
+    let tempKeys = keys;
     if (!inputFlowActive) {
       setInputFlowActive(true);
-      tempKeysDown = [];
+      tempKeys = [];
     }
     addKey(
       { name: e.key, id: uuid(), code: e.which, type: 'keydown' },
-      tempKeysDown
+      tempKeys
     );
   };
 
   const handleKeyUp = () => {
     setInputFlowActive(false);
+    setParentKeys(keys);
+    setReady(true);
     // if (document.activeElement instanceof HTMLElement) {
     //   document.activeElement.blur();
     // }
@@ -42,7 +45,7 @@ const Trigger = ({ keysDown, setKeysDown }: TriggerProps) => {
       label="Trigger"
       onKeyDown={handleKeyDown}
       onKeyUp={handleKeyUp}
-      value={displayKeys(keysDown, true)}
+      value={displayKeys(keys, true)}
     />
   );
 };

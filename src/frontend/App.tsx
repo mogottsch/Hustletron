@@ -23,7 +23,7 @@ const useStyles = makeStyles({
   },
 });
 
-const Hello = () => {
+const Generator = () => {
   const classes = useStyles();
   return (
     <Container className={classes.root} maxWidth="sm">
@@ -42,7 +42,7 @@ export default function App() {
       <CssBaseline />
       <Router>
         <Switch>
-          <Route path="/" component={Hello} />
+          <Route path="/" component={Generator} />
         </Switch>
       </Router>
     </>

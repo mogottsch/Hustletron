@@ -20,12 +20,13 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type RecorderProps = {
-  keys: Key[];
+  setReady: (isReady: boolean) => void;
   setKeys: React.Dispatch<React.SetStateAction<Key[]>>;
 };
 
-const Recorder = ({ keys, setKeys }: RecorderProps) => {
+const Recorder = ({ setKeys: setParentKeys, setReady }: RecorderProps) => {
   const classes = useStyles();
+  const [keys, setKeys] = useState<Key[]>([]);
   const [inputFlowActive, setInputFlowActive] = useState(false);
   const pressedKeysRef = useRef<Key[]>([]);
 
@@ -76,6 +77,11 @@ const Recorder = ({ keys, setKeys }: RecorderProps) => {
   const toggleRecord = () => {
     if (!inputFlowActive) {
       setKeys([]);
+      setReady(false);
+    }
+    if (inputFlowActive) {
+      setReady(true);
+      setParentKeys(keys);
     }
     setInputFlowActive((b) => !b);
   };
@@ -117,7 +123,7 @@ const Recorder = ({ keys, setKeys }: RecorderProps) => {
 
   return (
     <>
-      <Grid item xs={6}>
+      <Grid item xs={4}>
         <Box className={classes.btnBox}>
           <Button
             variant="outlined"
