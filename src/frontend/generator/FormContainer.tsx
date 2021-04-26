@@ -4,15 +4,14 @@ import {
   Button,
   CircularProgress,
   Grid,
-  makeStyles,
   Snackbar,
 } from '@material-ui/core';
-import TextField from '@material-ui/core/TextField';
+import { makeStyles } from '@material-ui/core/styles';
 import SaveIcon from '@material-ui/icons/Save';
 import Alert, { Color } from '@material-ui/lab/Alert';
 import { ipcRenderer } from 'electron';
 import React, { useState } from 'react';
-import Info from './Info';
+import { sortKeys } from '../helpers';
 import Name from './Name';
 import Recorder from './Recorder';
 import Trigger from './Trigger';
@@ -42,6 +41,7 @@ const FormContainer = () => {
   });
   const [macroKeys, setMacroKeys] = useState<Key[]>([]);
   const [triggerKeys, setKeys] = useState<Key[]>([]);
+  const [name, setName] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<Message | null>(null);
 
@@ -49,8 +49,9 @@ const FormContainer = () => {
     setLoading(true);
     ipcRenderer
       .invoke('generate-ahk-file', {
-        triggerKeys,
+        triggerKeys: sortKeys(triggerKeys),
         macroKeys,
+        name,
       })
       .then((response) => {
         if (!response.success) {
@@ -71,6 +72,12 @@ const FormContainer = () => {
         })
       );
   };
+
+  const submittable = Object.values(formReady).reduce(
+    (ready, curr) => ready && curr,
+    true
+  );
+
   return (
     <>
       <Backdrop className={classes.backdrop} open={loading}>
@@ -85,9 +92,6 @@ const FormContainer = () => {
           {message?.text ?? ''}
         </Alert>
       </Snackbar>
-      <Grid item xs={12}>
-        <Info />
-      </Grid>
       <Grid item xs={4}>
         <Trigger
           setReady={(isReady: boolean) =>
@@ -97,7 +101,13 @@ const FormContainer = () => {
         />
       </Grid>
       <Grid item xs={4}>
-        <Name />
+        <Name
+          name={name}
+          setName={setName}
+          setReady={(isReady: boolean) =>
+            setFormReady((c) => ({ ...c, name: isReady }))
+          }
+        />
       </Grid>
       <Recorder
         setReady={(isReady: boolean) =>
@@ -105,7 +115,7 @@ const FormContainer = () => {
         }
         setKeys={setMacroKeys}
       />
-      {macroKeys.length !== 0 && triggerKeys.length !== 0 && (
+      {submittable && (
         <Grid item xs={12}>
           <Box className={classes.btnBox}>
             <Button

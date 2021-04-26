@@ -2,4 +2,5 @@
 type MacroData = {
   triggerKeys: Key[];
   macroKeys: Key[];
+  name: string;
 };

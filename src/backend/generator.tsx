@@ -2,7 +2,8 @@ import path from 'path';
 import { ipcMain, app } from 'electron';
 import { keyCodeMap } from './keyCodeMap';
 
-const fs = require('fs').promises;
+const fs = require('fs');
+const fsPromises = require('fs').promises;
 
 const generateAhkScriptAsString = (
   triggerKeys: string[],
@@ -42,16 +43,21 @@ const convertData = (macroData: MacroData) => {
 };
 
 const initGenerator = () => {
-  ipcMain.handle('generate-ahk-file', async (event, macroData: MacroData) => {
+  ipcMain.handle('generate-ahk-file', async (_event, macroData: MacroData) => {
     const desktopPath = app.getPath('desktop');
-    const ahkPath = path.join(desktopPath, 'genemater.ahk');
+    const ahkDirPath = path.join(desktopPath, 'hustletron');
+    const ahkPath = path.join(ahkDirPath, `${macroData.name}.ahk`);
+
+    if (!fs.existsSync(ahkDirPath)) {
+      fs.mkdirSync(ahkDirPath);
+    }
     const { triggerKeys, macroKeyStrokes } = convertData(macroData);
-    // await new Promise((r) => setTimeout(r, 2000));
 
     try {
-      await fs.appendFile(
+      await fsPromises.writeFile(
         ahkPath,
-        generateAhkScriptAsString(triggerKeys, macroKeyStrokes)
+        generateAhkScriptAsString(triggerKeys, macroKeyStrokes),
+        { flag: 'w' }
       );
     } catch (error) {
       return { success: false, error };

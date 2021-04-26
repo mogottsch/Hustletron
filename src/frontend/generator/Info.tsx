@@ -1,4 +1,5 @@
-import { makeStyles } from '@material-ui/core';
+import { ipcRenderer } from 'electron';
+import { makeStyles } from '@material-ui/core/styles';
 import React, { useEffect, useState } from 'react';
 import { DateTime } from 'luxon';
 
@@ -7,7 +8,7 @@ const useStyle = makeStyles({
     fontSize: '12px',
     fontWeight: 100,
     color: 'grey',
-    margin: '36px 13px 13px 13px',
+    margin: '36px 13px 13px -51px',
     display: 'grid',
   },
   times: {
@@ -16,7 +17,7 @@ const useStyle = makeStyles({
     marginLeft: '5px',
   },
   heading: { display: 'inline-block' },
-  header: { display: 'flex', justifyContent: 'start' },
+  header: { display: 'flex', justifyContent: 'space-between' },
 });
 
 const pad = (num: number) => {
@@ -28,9 +29,19 @@ const pad = (num: number) => {
 const Info = () => {
   const classes = useStyle();
   const [now, setNow] = useState(DateTime.now());
+  const [version, setVersion] = useState('');
   useEffect(() => {
+    ipcRenderer.send('app_version');
+    ipcRenderer.on('app_version', (_event, arg) => {
+      ipcRenderer.removeAllListeners('app_version');
+      setVersion(arg.version);
+    });
+
     const interval = setInterval(() => setNow(() => DateTime.now()), 1000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      ipcRenderer.removeAllListeners('app_version');
+    };
   });
 
   const createdAt = DateTime.fromISO('2021-04-26T16:15:00');
@@ -50,15 +61,14 @@ const Info = () => {
                 return null;
               }
               return (
-                <>
-                  <div key={timeCategory}>
-                    {pad(Math.round(value))} {timeCategory}
-                  </div>
-                </>
+                <div key={timeCategory}>
+                  {pad(Math.round(value))} {timeCategory}
+                </div>
               );
             })}
           </div>
         </div>
+        <span>v{version}</span>
       </div>
       <p>
         Click on the Trigger input field and define what should trigger the

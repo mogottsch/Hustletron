@@ -1,20 +1,32 @@
 import TextField from '@material-ui/core/TextField';
-import React, { FormEvent, useEffect, useState } from 'react';
+import React, { FormEvent, useEffect } from 'react';
 
-const Name = () => {
-  const [name, setName] = useState('');
+type NameProps = {
+  setReady: (isReady: boolean) => void;
+  setName: React.Dispatch<React.SetStateAction<string>>;
+  name: string;
+};
+
+const Name = ({ setReady, setName, name }: NameProps) => {
   useEffect(() => {
-    if (name.includes(' ')) {
-      setName((n) => n.replace(' ', '-'));
-    }
-    setName((n) => n.toLowerCase());
-    setName((n) => n.replace(/[^\d|\w|-]/g, ''));
-  }, [name, setName]);
+    setReady(name.length !== 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [name]);
+
+  const updateName = (n: string) => {
+    setName(
+      n
+        .toLowerCase()
+        .replace(' ', '-')
+        .replace(/[^\d|\w|-]/g, '')
+    );
+  };
+
   return (
     <TextField
       label="Name"
       onChange={(event: FormEvent<HTMLInputElement>) =>
-        setName(event.currentTarget.value)
+        updateName(event.currentTarget.value)
       }
       value={name}
     />

@@ -11,16 +11,20 @@ const rankKey = (key: string) => {
   return 0;
 };
 
+const sortKeys = (keys: Key[]): Key[] => {
+  keys.sort((a, b) => {
+    return rankKey(b.name) - rankKey(a.name);
+  });
+  return keys;
+};
+
 const displayKeys = (keys: Key[], toUpper = false) => {
-  let names = keys.map(({ name }) => name);
+  let names = sortKeys(keys).map(({ name }) => name);
   if (toUpper) {
     names = names.map((name) => name.charAt(0).toUpperCase() + name.slice(1));
   }
-  names.sort((a, b) => {
-    return rankKey(b) - rankKey(a);
-  });
   names = names.map((name) => name.replace(/\s/g, 'Space'));
   return names.join(' + ') ?? '';
 };
 
-export { displayKeys, rankKey };
+export { displayKeys, rankKey, sortKeys };

@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Button, Box, makeStyles, Grid } from '@material-ui/core';
+import { Button, Box, Grid } from '@material-ui/core';
+import { makeStyles, Theme } from '@material-ui/core/styles';
 import { v4 as uuid } from 'uuid';
 import KeyBox from './KeyBox';
 import KeyGroupBox from './KeyGroupBox';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   btnBox: {
     display: 'flex',
     justifyContent: 'center',
