@@ -73,7 +73,7 @@ const Info = () => {
       <p>
         Click on the Trigger input field and define what should trigger the
         macro. After that record the macro by clicking the start button and
-        pressing all keys that the macro should record.
+        pressing all keys that the macro should record. Test updater.
       </p>
     </div>
   );
