@@ -2,7 +2,9 @@ import {
   Backdrop,
   Box,
   Button,
+  Checkbox,
   CircularProgress,
+  FormControlLabel,
   Grid,
   Snackbar,
 } from '@material-ui/core';
@@ -19,7 +21,7 @@ import Trigger from './Trigger';
 const useStyles = makeStyles(() => ({
   btnBox: {
     display: 'flex',
-    justifyContent: 'center',
+    justifyContent: 'start',
     alignItems: 'center',
   },
   backdrop: {
@@ -42,6 +44,8 @@ const FormContainer = () => {
   const [macroKeys, setMacroKeys] = useState<Key[]>([]);
   const [triggerKeys, setKeys] = useState<Key[]>([]);
   const [name, setName] = useState<string>('');
+  const [autoRunScript, setAutoRunScript] = useState<boolean>(false);
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<Message | null>(null);
 
@@ -52,6 +56,7 @@ const FormContainer = () => {
         triggerKeys: sortKeys(triggerKeys),
         macroKeys,
         name,
+        autoRunScript,
       })
       .then((response) => {
         if (!response.success) {
@@ -118,15 +123,28 @@ const FormContainer = () => {
       {submittable && (
         <Grid item xs={12}>
           <Box className={classes.btnBox}>
-            <Button
-              size="large"
-              variant="contained"
-              color="primary"
-              endIcon={<SaveIcon />}
-              onClick={submit}
-            >
-              Generate
-            </Button>
+            <Box mr={2}>
+              <Button
+                size="large"
+                variant="contained"
+                color="primary"
+                endIcon={<SaveIcon />}
+                onClick={submit}
+              >
+                Generate
+              </Button>
+            </Box>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={autoRunScript}
+                  onChange={() => setAutoRunScript((c) => !c)}
+                  name="autorun"
+                  color="primary"
+                />
+              }
+              label="Autorun script after generation"
+            />
           </Box>
         </Grid>
       )}

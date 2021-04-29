@@ -181,16 +181,12 @@ const keyCodeMap = {
   // 255: 'toggle touchpad',
 };
 
-// const getAhkKey = <KeyCode extends keyof typeof keyCodeMap>(
-//   key: KeyCode
-// ): typeof keyCodeMap[KeyCode] => keyCodeMap[key];
+const getAhkKey = (keyCode: number) => {
+  if (!(keyCode in keyCodeMap)) {
+    throw new Error('Unknown key');
+  }
 
-// const getAhkKey = (keyCode: number) => {
-//   if(keyCode indexof)
-//   const ahkKey = keyCodeMap[keyCode];
-//   if (ahkKey === undefined) {
-//     throw 'error';
-//   }
-// };
+  return keyCodeMap[keyCode as keyof typeof keyCodeMap];
+};
 
-export { keyCodeMap };
+export { keyCodeMap, getAhkKey };

@@ -1,6 +1,8 @@
 import path from 'path';
 import { ipcMain, app } from 'electron';
-import { keyCodeMap } from './keyCodeMap';
+import regedit from 'regedit';
+import { exec } from 'child_process';
+import { getAhkKey } from './keyCodeMap';
 
 const fs = require('fs');
 const fsPromises = require('fs').promises;
@@ -20,6 +22,7 @@ const generateAhkScriptAsString = (
     .join('\n');
 
   return `;Scriptname
+#SingleInstance Force
 ~${firstTrigger}::
 	Send {${firstTrigger}}
 ${waitForOtherTriggers}
@@ -34,19 +37,40 @@ return
 const convertData = (macroData: MacroData) => {
   const { triggerKeys, macroKeys } = macroData;
   return {
-    triggerKeys: triggerKeys.map((key) => keyCodeMap[key.code]),
+    triggerKeys: triggerKeys.map((key) => getAhkKey(key.code)),
     macroKeyStrokes: macroKeys.map(
       (key) =>
-        `${keyCodeMap[key.code]} ${key.type === 'keydown' ? 'down' : 'up'}`
+        `${getAhkKey(key.code)} ${key.type === 'keydown' ? 'down' : 'up'}`
     ),
   };
+};
+
+const getAhkExecPath = async (): Promise<string> => {
+  let ahkRegistryEntry: any;
+  try {
+    ahkRegistryEntry = await new Promise<any>((resolve, reject) => {
+      regedit
+        .list('HKLM\\SOFTWARE\\AutoHotkey')
+        .on('data', ({ data }: any) => resolve(data))
+        .on('finish', () => reject());
+    });
+  } catch (error) {
+    throw new Error('Error reading registry. Autorun will not work.');
+  }
+
+  const installDir = ahkRegistryEntry?.values?.InstallDir?.value;
+
+  if (!installDir) {
+    throw new Error('Error reading registry. Autorun will not work.');
+  }
+  return `${installDir}\\AutoHotkey.exe`;
 };
 
 const initGenerator = () => {
   ipcMain.handle('generate-ahk-file', async (_event, macroData: MacroData) => {
     const desktopPath = app.getPath('desktop');
     const ahkDirPath = path.join(desktopPath, 'hustletron');
-    const ahkPath = path.join(ahkDirPath, `${macroData.name}.ahk`);
+    const AhkFilePath = path.join(ahkDirPath, `${macroData.name}.ahk`);
 
     if (!fs.existsSync(ahkDirPath)) {
       fs.mkdirSync(ahkDirPath);
@@ -55,7 +79,7 @@ const initGenerator = () => {
 
     try {
       await fsPromises.writeFile(
-        ahkPath,
+        AhkFilePath,
         generateAhkScriptAsString(triggerKeys, macroKeyStrokes),
         { flag: 'w' }
       );
@@ -63,7 +87,19 @@ const initGenerator = () => {
       return { success: false, error };
     }
 
-    return { success: true };
+    const errors: any = [];
+    if (macroData.autoRunScript) {
+      let ahkExecPath = '';
+
+      try {
+        ahkExecPath = await getAhkExecPath();
+        exec(`${ahkExecPath} ${AhkFilePath}`);
+      } catch (error) {
+        errors.append(error);
+      }
+    }
+
+    return { success: true, errors };
   });
 };
 

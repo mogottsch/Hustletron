@@ -254,6 +254,7 @@
     "react-dom": "^17.0.1",
     "react-flippy": "^0.1.5",
     "react-router-dom": "^5.2.0",
+    "regedit": "^3.0.3",
     "regenerator-runtime": "^0.13.5",
     "source-map-support": "^0.5.19",
     "uuid": "^3.4.0"
