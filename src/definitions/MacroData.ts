@@ -4,4 +4,5 @@ type MacroData = {
   macroKeys: Key[];
   name: string;
   autoRunScript: boolean;
+  runScriptOnStartUp: boolean;
 };

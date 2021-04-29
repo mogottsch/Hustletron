@@ -11,11 +11,12 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import initGenerator from './backend/generator';
+import initUpdater from './backend/updater';
 
 export default class AppUpdater {
   constructor() {
@@ -134,17 +135,4 @@ app.on('activate', () => {
   if (mainWindow === null) createWindow();
 });
 
-ipcMain.on('app_version', (event) => {
-  event.sender.send('app_version', { version: app.getVersion() });
-});
-
-autoUpdater.on('update-available', () => {
-  mainWindow.webContents.send('update_available');
-});
-autoUpdater.on('update-downloaded', () => {
-  mainWindow.webContents.send('update_downloaded');
-});
-
-ipcMain.on('restart_app', () => {
-  autoUpdater.quitAndInstall();
-});
+if (mainWindow !== null) initUpdater(mainWindow);

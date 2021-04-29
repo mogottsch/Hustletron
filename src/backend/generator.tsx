@@ -1,11 +1,9 @@
 import path from 'path';
 import { ipcMain, app } from 'electron';
 import regedit from 'regedit';
+import fs from 'fs';
 import { exec } from 'child_process';
 import { getAhkKey } from './keyCodeMap';
-
-const fs = require('fs');
-const fsPromises = require('fs').promises;
 
 const generateAhkScriptAsString = (
   triggerKeys: string[],
@@ -66,34 +64,62 @@ const getAhkExecPath = async (): Promise<string> => {
   return `${installDir}\\AutoHotkey.exe`;
 };
 
+// const handleStartUpFile()
+
 const initGenerator = () => {
+  const errors: any = [];
+
   ipcMain.handle('generate-ahk-file', async (_event, macroData: MacroData) => {
-    const desktopPath = app.getPath('desktop');
-    const ahkDirPath = path.join(desktopPath, 'hustletron');
-    const AhkFilePath = path.join(ahkDirPath, `${macroData.name}.ahk`);
+    const ahkDirPath = path.join(app.getPath('desktop'), 'hustletron');
+    const filename = `${macroData.name}.ahk`;
+    const ahkFilePath = path.join(ahkDirPath, filename);
 
     if (!fs.existsSync(ahkDirPath)) {
       fs.mkdirSync(ahkDirPath);
     }
     const { triggerKeys, macroKeyStrokes } = convertData(macroData);
 
+    let ahkScript: string;
     try {
-      await fsPromises.writeFile(
-        AhkFilePath,
-        generateAhkScriptAsString(triggerKeys, macroKeyStrokes),
-        { flag: 'w' }
-      );
+      ahkScript = generateAhkScriptAsString(triggerKeys, macroKeyStrokes);
     } catch (error) {
-      return { success: false, error };
+      errors.push(error);
+      return { success: false, errors };
     }
 
-    const errors: any = [];
+    try {
+      fs.writeFileSync(ahkFilePath, ahkScript, { flag: 'w' });
+    } catch (error) {
+      errors.push(error);
+    }
+
+    const startUpDirPath = path.join(
+      app.getPath('appData'),
+      'Microsoft\\Windows\\Start Menu\\Programs\\Startup'
+    );
+    const startUpAhkFilePath = path.join(startUpDirPath, filename);
+
+    if (macroData.runScriptOnStartUp) {
+      console.log(startUpAhkFilePath);
+      try {
+        fs.writeFileSync(startUpAhkFilePath, ahkScript, { flag: 'w' });
+      } catch (error) {
+        errors.push(error);
+      }
+    } else {
+      try {
+        fs.unlinkSync(startUpAhkFilePath);
+      } catch (error) {
+        if (error.code !== 'ENOENT') errors.push(error);
+      }
+    }
+
     if (macroData.autoRunScript) {
       let ahkExecPath = '';
 
       try {
         ahkExecPath = await getAhkExecPath();
-        exec(`${ahkExecPath} ${AhkFilePath}`);
+        exec(`${ahkExecPath} ${ahkFilePath}`);
       } catch (error) {
         errors.append(error);
       }

@@ -21,7 +21,7 @@ import Trigger from './Trigger';
 const useStyles = makeStyles(() => ({
   btnBox: {
     display: 'flex',
-    justifyContent: 'start',
+    justifyContent: 'center',
     alignItems: 'center',
   },
   backdrop: {
@@ -45,6 +45,7 @@ const FormContainer = () => {
   const [triggerKeys, setKeys] = useState<Key[]>([]);
   const [name, setName] = useState<string>('');
   const [autoRunScript, setAutoRunScript] = useState<boolean>(false);
+  const [runScriptOnStartUp, setRunScriptOnStartUp] = useState<boolean>(false);
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<Message | null>(null);
@@ -57,6 +58,7 @@ const FormContainer = () => {
         macroKeys,
         name,
         autoRunScript,
+        runScriptOnStartUp,
       })
       .then((response) => {
         if (!response.success) {
@@ -121,19 +123,9 @@ const FormContainer = () => {
         setKeys={setMacroKeys}
       />
       {submittable && (
-        <Grid item xs={12}>
-          <Box className={classes.btnBox}>
-            <Box mr={2}>
-              <Button
-                size="large"
-                variant="contained"
-                color="primary"
-                endIcon={<SaveIcon />}
-                onClick={submit}
-              >
-                Generate
-              </Button>
-            </Box>
+        <>
+          <Grid item xs={12}>
+            <h3> Settings</h3>
             <FormControlLabel
               control={
                 <Checkbox
@@ -145,8 +137,32 @@ const FormContainer = () => {
               }
               label="Autorun script after generation"
             />
-          </Box>
-        </Grid>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={runScriptOnStartUp}
+                  onChange={() => setRunScriptOnStartUp((c) => !c)}
+                  name="autorun"
+                  color="primary"
+                />
+              }
+              label="Autorun script on Windows Startup"
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Box className={classes.btnBox}>
+              <Button
+                size="large"
+                variant="contained"
+                color="primary"
+                endIcon={<SaveIcon />}
+                onClick={submit}
+              >
+                Generate
+              </Button>
+            </Box>
+          </Grid>
+        </>
       )}
     </>
   );
