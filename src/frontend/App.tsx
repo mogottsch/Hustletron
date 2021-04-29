@@ -14,7 +14,9 @@ const WhiteBox = styled(Box)({
 
 const useStyles = makeStyles({
   root: {
-    marginTop: '64px',
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
   },
 });
 
