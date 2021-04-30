@@ -30,7 +30,12 @@ const useStyles = makeStyles(() => ({
 }));
 
 type Message = {
-  text: string;
+  text:
+    | string
+    | React.DetailedHTMLProps<
+        React.HTMLAttributes<HTMLDivElement>,
+        HTMLDivElement
+      >;
   severity: Color;
 };
 
@@ -62,7 +67,7 @@ const FormContainer = () => {
       })
       .then((response) => {
         if (!response.success) {
-          throw response.error;
+          throw response.errors;
         }
         setMessage({
           text:
@@ -74,7 +79,11 @@ const FormContainer = () => {
       .finally(() => setLoading(false))
       .catch((error: unknown) =>
         setMessage({
-          text: `Error generating ahk file :( \n ${error}`,
+          text: (
+            <div>
+              Error generating ahk file :( <br /> {String(error)}
+            </div>
+          ),
           severity: 'error',
         })
       );
@@ -95,7 +104,10 @@ const FormContainer = () => {
         autoHideDuration={6000}
         onClose={() => setMessage(null)}
       >
-        <Alert severity={message?.severity ?? 'success'}>
+        <Alert
+          severity={message?.severity ?? 'success'}
+          onClose={() => setMessage(null)}
+        >
           {message?.text ?? ''}
         </Alert>
       </Snackbar>

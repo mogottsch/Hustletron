@@ -84,7 +84,14 @@
       "output": "release"
     },
     "extraResources": [
-      "./assets/**"
+      "./assets/**",
+      {
+        "from": "node_modules/regedit/vbs",
+        "to": "regedit/vbs",
+        "filter": [
+          "**/*"
+        ]
+      }
     ],
     "publish": {
       "provider": "github",

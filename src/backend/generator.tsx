@@ -3,6 +3,7 @@ import { ipcMain, app } from 'electron';
 import regedit from 'regedit';
 import fs from 'fs';
 import { exec } from 'child_process';
+import log from 'electron-log';
 import { getAhkKey } from './keyCodeMap';
 
 const generateAhkScriptAsString = (
@@ -46,17 +47,29 @@ const convertData = (macroData: MacroData) => {
 const getAhkExecPath = async (): Promise<string> => {
   let ahkRegistryEntry: any;
   try {
-    ahkRegistryEntry = await new Promise<any>((resolve, reject) => {
-      regedit
-        .list('HKLM\\SOFTWARE\\AutoHotkey')
-        .on('data', ({ data }: any) => resolve(data))
-        .on('finish', () => reject());
+    ahkRegistryEntry = await new Promise<never>((resolve, reject) => {
+      const vbsDirectory = path.join(
+        path.dirname(app.getPath('exe')),
+        './resources/regedit/vbs'
+      );
+      regedit.setExternalVBSLocation(vbsDirectory);
+      regedit.list(
+        'HKLM\\SOFTWARE\\AutoHotkey',
+        (err: never, result: never) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve(result);
+        }
+      );
     });
   } catch (error) {
     throw new Error('Error reading registry. Autorun will not work.');
   }
 
-  const installDir = ahkRegistryEntry?.values?.InstallDir?.value;
+  const installDir =
+    ahkRegistryEntry?.['HKLM\\SOFTWARE\\AutoHotkey']?.values?.InstallDir?.value;
 
   if (!installDir) {
     throw new Error('Error reading registry. Autorun will not work.');
@@ -67,29 +80,36 @@ const getAhkExecPath = async (): Promise<string> => {
 // const handleStartUpFile()
 
 const initGenerator = () => {
-  const errors: any = [];
-
   ipcMain.handle('generate-ahk-file', async (_event, macroData: MacroData) => {
+    const errors: unknown[] = [];
+    log.info('starting ahk file generation');
+
+    const { triggerKeys, macroKeyStrokes } = convertData(macroData);
+
+    let ahkScript: string;
+    try {
+      log.verbose('generating ahk script string');
+      ahkScript = generateAhkScriptAsString(triggerKeys, macroKeyStrokes);
+    } catch (error: unknown) {
+      log.error('failed generating ahk script string', error);
+      errors.push(error);
+      return { success: false, errors };
+    }
+
     const ahkDirPath = path.join(app.getPath('desktop'), 'hustletron');
     const filename = `${macroData.name}.ahk`;
     const ahkFilePath = path.join(ahkDirPath, filename);
 
     if (!fs.existsSync(ahkDirPath)) {
+      log.verbose('hustletron dir does not exists, creating...');
       fs.mkdirSync(ahkDirPath);
     }
-    const { triggerKeys, macroKeyStrokes } = convertData(macroData);
-
-    let ahkScript: string;
-    try {
-      ahkScript = generateAhkScriptAsString(triggerKeys, macroKeyStrokes);
-    } catch (error) {
-      errors.push(error);
-      return { success: false, errors };
-    }
 
     try {
+      log.verbose('writing ahk script to ahk dir');
       fs.writeFileSync(ahkFilePath, ahkScript, { flag: 'w' });
     } catch (error) {
+      log.error('failed writing ahk script to hustletron dir', error);
       errors.push(error);
     }
 
@@ -100,32 +120,44 @@ const initGenerator = () => {
     const startUpAhkFilePath = path.join(startUpDirPath, filename);
 
     if (macroData.runScriptOnStartUp) {
-      console.log(startUpAhkFilePath);
       try {
+        log.verbose('writing ahk script to startup dir');
         fs.writeFileSync(startUpAhkFilePath, ahkScript, { flag: 'w' });
       } catch (error) {
+        log.error('failed writing ahk script to startup dir', error);
         errors.push(error);
       }
     } else {
       try {
+        log.verbose('deleting ahk script from startup dir');
         fs.unlinkSync(startUpAhkFilePath);
       } catch (error) {
-        if (error.code !== 'ENOENT') errors.push(error);
+        if (error.code !== 'ENOENT') {
+          log.error('failed deleting ahk script from startup dir', error);
+          errors.push(error);
+        }
       }
     }
 
     if (macroData.autoRunScript) {
       let ahkExecPath = '';
-
       try {
+        log.verbose('retrieving ahk exec path from registry');
         ahkExecPath = await getAhkExecPath();
-        exec(`${ahkExecPath} ${ahkFilePath}`);
+        try {
+          log.verbose('executing ahk script');
+          exec(`${ahkExecPath} ${ahkFilePath}`);
+        } catch (error) {
+          log.error('failed exectuting ahk script', error);
+          errors.push(error);
+        }
       } catch (error) {
-        errors.append(error);
+        log.error('failed retrieving ahk exec path from registry', error);
+        errors.push(error);
       }
     }
 
-    return { success: true, errors };
+    return { success: errors.length === 0, errors };
   });
 };
 

@@ -42,7 +42,7 @@ const Info = () => {
       clearInterval(interval);
       ipcRenderer.removeAllListeners('app_version');
     };
-  });
+  }, []);
 
   const createdAt = DateTime.fromISO('2021-04-26T16:15:00');
   const diff = now

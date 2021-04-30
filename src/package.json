@@ -1,15 +1,12 @@
 {
   "name": "hustletron",
   "productName": "hustletron",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "GUI that allows you to generate autohotkey files.",
   "main": "./main.prod.js",
   "scripts": {
     "electron-rebuild": "node -r ../.erb/scripts/BabelRegister.js ../.erb/scripts/ElectronRebuild.js",
     "postinstall": "yarn electron-rebuild"
   },
-  "license": "MIT",
-  "devDependencies": {
-    "@types/uuid": "^8.3.0"
-  }
+  "license": "MIT"
 }
