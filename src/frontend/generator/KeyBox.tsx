@@ -8,8 +8,6 @@ import { makeStyles } from '@material-ui/core';
 const useStyles = makeStyles((theme) => ({
   paper: {
     margin: theme.spacing(1),
-    background: '#797474',
-    color: 'white',
   },
 }));
 
