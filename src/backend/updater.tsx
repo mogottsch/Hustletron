@@ -2,8 +2,8 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 
 const initUpdater = (mainWindow: BrowserWindow) => {
-  ipcMain.on('app_version', (event) => {
-    event.sender.send('app_version', { version: app.getVersion() });
+  ipcMain.handle('app_version', () => {
+    return { version: app.getVersion() };
   });
 
   autoUpdater.on('update-available', () => {

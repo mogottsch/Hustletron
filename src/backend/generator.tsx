@@ -51,11 +51,6 @@ const getAhkExecPath = async (): Promise<string> => {
   let ahkRegistryEntry: any;
   try {
     ahkRegistryEntry = await new Promise<never>((resolve, reject) => {
-      const vbsDirectory = path.join(
-        path.dirname(app.getPath('exe')),
-        './resources/regedit/vbs'
-      );
-      regedit.setExternalVBSLocation(vbsDirectory);
       regedit.list(
         'HKLM\\SOFTWARE\\AutoHotkey',
         (err: never, result: never) => {

@@ -31,11 +31,10 @@ const Info = () => {
   const [now, setNow] = useState(DateTime.now());
   const [version, setVersion] = useState('');
   useEffect(() => {
-    ipcRenderer.send('app_version');
-    ipcRenderer.on('app_version', (_event, arg) => {
-      ipcRenderer.removeAllListeners('app_version');
-      setVersion(arg.version);
-    });
+    ipcRenderer
+      .invoke('app_version')
+      .then((response) => setVersion(response.version))
+      .catch(() => setVersion('X'));
 
     const interval = setInterval(() => setNow(() => DateTime.now()), 1000);
     return () => {
