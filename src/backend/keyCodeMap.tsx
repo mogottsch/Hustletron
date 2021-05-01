@@ -181,6 +181,21 @@ const keyCodeMap = {
   // 255: 'toggle touchpad',
 };
 
+const modifierMap = {
+  LWin: '#',
+  RWin: '#',
+  Alt: '!',
+  Control: '^',
+  Shift: '+',
+};
+
+const getModifier = (ahkKey: string) => {
+  if (!(ahkKey in modifierMap)) {
+    throw new Error('Unknown modifier key');
+  }
+  return modifierMap[ahkKey as keyof typeof modifierMap];
+};
+
 const getAhkKey = (keyCode: number) => {
   if (!(keyCode in keyCodeMap)) {
     throw new Error('Unknown key');
@@ -189,4 +204,4 @@ const getAhkKey = (keyCode: number) => {
   return keyCodeMap[keyCode as keyof typeof keyCodeMap];
 };
 
-export { keyCodeMap, getAhkKey };
+export { keyCodeMap, getAhkKey, getModifier, modifierMap };

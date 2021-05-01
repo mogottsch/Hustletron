@@ -6,3 +6,8 @@ type MacroData = {
   autoRunScript: boolean;
   runScriptOnStartUp: boolean;
 };
+
+type TriggerObject = {
+  mode: 'general' | 'modifier';
+  string: string;
+};

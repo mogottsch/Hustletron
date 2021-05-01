@@ -6,32 +6,34 @@ import { exec } from 'child_process';
 import log from 'electron-log';
 import { getAhkKey } from './keyCodeMap';
 import storeMacroData from './storage';
+import getTriggerObject from './generator/trigger';
 
 const generateAhkScriptAsString = (
   triggerKeys: string[],
   macroKeyStrokes: string[]
 ): string => {
-  const firstTrigger = triggerKeys[0];
-  const otherTriggers = triggerKeys.slice(1);
-
-  const waitForOtherTriggers = otherTriggers
-    .map((trigger) => `    KeyWait, ${trigger}, D T1`)
-    .join('\n');
   const sendKeys = macroKeyStrokes
     .map((key) => `        Send {${key}}`)
     .join('\n');
 
-  return `;Scriptname
-#SingleInstance Force
-~${firstTrigger}::
-	Send {${firstTrigger}}
-${waitForOtherTriggers}
+  const triggerObject = getTriggerObject(triggerKeys);
+
+  let scriptString = `#SingleInstance Force
+${triggerObject.string}`;
+
+  if (triggerObject.mode === 'general') {
+    scriptString += `
     if (ErrorLevel = 0)
     {
 ${sendKeys}
-    }
-return
-`;
+    }`;
+  }
+  if (triggerObject.mode === 'modifier') {
+    scriptString += `
+${sendKeys}`;
+  }
+  return `${scriptString}
+return`;
 };
 
 const convertData = (macroData: MacroData) => {
