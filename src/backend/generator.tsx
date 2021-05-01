@@ -5,6 +5,7 @@ import fs from 'fs';
 import { exec } from 'child_process';
 import log from 'electron-log';
 import { getAhkKey } from './keyCodeMap';
+import storeMacroData from './storage';
 
 const generateAhkScriptAsString = (
   triggerKeys: string[],
@@ -82,6 +83,10 @@ const getAhkExecPath = async (): Promise<string> => {
 const initGenerator = () => {
   ipcMain.handle('generate-ahk-file', async (_event, macroData: MacroData) => {
     const errors: unknown[] = [];
+
+    log.info('saving macro date to disk');
+    storeMacroData(macroData);
+
     log.info('starting ahk file generation');
 
     const { triggerKeys, macroKeyStrokes } = convertData(macroData);
