@@ -1,5 +1,5 @@
 import log from 'electron-log';
-import { app } from 'electron/main';
+import { app } from 'electron';
 import fs from 'fs';
 import path from 'path';
 
