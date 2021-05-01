@@ -1,7 +1,7 @@
 {
   "name": "hustletron",
   "productName": "hustletron",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "GUI that allows you to generate autohotkey files.",
   "main": "./main.prod.js",
   "scripts": {

@@ -1,11 +1,11 @@
-import { Backdrop, Box, Button, Grid, Link } from '@material-ui/core';
+import { Backdrop, Box, Button, Grid } from '@material-ui/core';
 import Card from '@material-ui/core/Card';
 import LinearProgress from '@material-ui/core/LinearProgress';
-import { makeStyles, Theme } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import { ipcRenderer } from 'electron';
 import React, { useEffect, useState } from 'react';
 
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles(() => ({
   backdrop: {
     zIndex: 1,
   },
