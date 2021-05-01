@@ -89,12 +89,16 @@ const Recorder = ({ setKeys: setParentKeys, setReady }: RecorderProps) => {
 
   const removeKey = (findId: string) => {
     let index = keys.findIndex(({ id }) => id === findId);
-    if (index !== -1) {
-      setKeys((k) => {
-        index = k.findIndex(({ id }) => id === findId);
-        return [...k.slice(0, index), ...k.slice(index + 1)];
-      });
+
+    if (index === -1) {
+      return;
     }
+    const removeKeyCallback = (currentKeys: Key[]): Key[] => {
+      index = currentKeys.findIndex(({ id }) => id === findId);
+      return [...currentKeys.slice(0, index), ...currentKeys.slice(index + 1)];
+    };
+    setKeys(removeKeyCallback);
+    setParentKeys(removeKeyCallback);
   };
 
   const removeGroup = (group: Key[]) => {
